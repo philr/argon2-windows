@@ -1,0 +1,78 @@
+name: Release
+
+on: [push]
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      matrix:
+        platform: [x86, x64]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout argon2
+        uses: actions/checkout@v2
+        with:
+          repository: P-H-C/phc-winner-argon2
+          ref: 20190702
+          path: phc-winner-argon2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2
+      - name: Build
+        working-directory: phc-winner-argon2
+        shell: cmd
+        run: MSBuild Argon2.sln -maxcpucount -p:Configuration=Release -p:Platform=${{ matrix.platform }} -p:WindowsTargetPlatformVersion=10
+      - name: Test Reference (Portable) Build
+        working-directory: phc-winner-argon2/vs2015/build
+        shell: cmd
+        run: Argon2RefTestCI.exe
+      - name: Test Optimized (AVX) Build
+        working-directory: phc-winner-argon2/vs2015/build
+        shell: cmd
+        run: Argon2OptTestCI.exe
+      - id: set_zip_name
+        name: Set Zip Name
+        shell: bash
+        run: |
+          if [[ ${GITHUB_REF} == refs/tags/* ]]; then
+            echo "::set-output name=zip_name::argon2-${GITHUB_REF##*/}-${{ matrix.platform }}.zip"
+          else
+            echo "::set-output name=zip_name::argon2-latest-${{ matrix.platform }}.zip"
+          fi
+      - name: Create Zip
+        working-directory: phc-winner-argon2/vs2015/build
+        shell: cmd
+        run: 7z a -mx9 ${{ steps.set_zip_name.outputs.zip_name }} *.* ..\..\LICENSE
+      - name: Upload Zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.set_zip_name.outputs.zip_name }}
+          path: phc-winner-argon2/vs2015/build/${{ steps.set_zip_name.outputs.zip_name }}
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/*')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+      - name: Create Release
+        run: |
+          set -x
+          assets=()
+          for asset in *.zip; do
+            assets+=("--attach" "$asset")
+          done
+          tag_name="${GITHUB_REF##*/}"
+          hub release create "${assets[@]}" --draft --message "$tag_name" "$tag_name"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
+
+
+
