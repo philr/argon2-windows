@@ -11,13 +11,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout argon2
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: P-H-C/phc-winner-argon2
           ref: 20190702
           path: phc-winner-argon2
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.1
       - name: Build
         working-directory: phc-winner-argon2
         shell: cmd
@@ -44,7 +44,7 @@ jobs:
         shell: cmd
         run: 7z a -mx9 ${{ steps.set_zip_name.outputs.zip_name }} *.* ..\..\LICENSE
       - name: Upload Zip
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.set_zip_name.outputs.zip_name }}
           path: phc-winner-argon2/vs2015/build/${{ steps.set_zip_name.outputs.zip_name }}
@@ -56,9 +56,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
       - name: Create Release
         run: |
           set -x
