@@ -35,9 +35,9 @@ jobs:
         shell: bash
         run: |
           if [[ ${GITHUB_REF} == refs/tags/* ]]; then
-            echo "::set-output name=zip_name::argon2-${GITHUB_REF##*/}-${{ matrix.platform }}.zip"
+            echo "zip_name=argon2-${GITHUB_REF##*/}-${{ matrix.platform }}.zip" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=zip_name::argon2-latest-${{ matrix.platform }}.zip"
+            echo "zip_name=argon2-latest-${{ matrix.platform }}.zip" >> $GITHUB_OUTPUT
           fi
       - name: Create Zip
         working-directory: phc-winner-argon2/vs2015/build
