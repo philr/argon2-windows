@@ -17,7 +17,7 @@ jobs:
           ref: 20190702
           path: phc-winner-argon2
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v2
       - name: Build
         working-directory: phc-winner-argon2
         shell: cmd
