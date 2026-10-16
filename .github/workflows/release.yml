@@ -48,6 +48,7 @@ jobs:
         with:
           name: ${{ steps.set_zip_name.outputs.zip_name }}
           path: phc-winner-argon2/vs2015/build/${{ steps.set_zip_name.outputs.zip_name }}
+          archive: false
 
   release:
     name: Release
